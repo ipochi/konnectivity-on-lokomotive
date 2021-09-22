@@ -1,0 +1,90 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: konnectivity-server
+  namespace: kube-system
+  annotations:
+    scheduler.alpha.kubernetes.io/critical-pod: ''
+    seccomp.security.alpha.kubernetes.io/pod: 'docker/default'
+spec:
+  hostNetwork: true
+  nodeSelector:
+    node.kubernetes.io/master: ""
+  containers:
+  - name: konnectivity-server-container
+    image: ${PROXY_IMAGE}
+    resources:
+      requests:
+        cpu: 1m
+    command: [ "/proxy-server"]
+    args: [
+      "--log-file=/var/konnectivity-server/konnectivity-server.log",
+      "--logtostderr=false",
+      "--log-file-max-size=0",
+      "--uds-name=/var/konnectivity-server/konnectivity-server.socket",
+      "--cluster-cert=/etc/kubernetes/secrets/apiserver.crt",
+      "--cluster-key=/etc/kubernetes/secrets/apiserver.key",
+      "--server-port=0",
+      "--agent-port=8091",
+      "--health-port=8092",
+      "--admin-port=8093",
+      "--keepalive-time=1h",
+      "--mode=http-connect",
+      "--agent-namespace=kube-system",
+      "--agent-service-account=konnectivity-agent",
+      "--kubeconfig=/var/konnectivity-server/kubeconfig/kubeconfig",
+      "--authentication-audience=system:konnectivity-server",
+      ]
+    livenessProbe:
+      httpGet:
+        scheme: HTTP
+        host: 127.0.0.1
+        port: 8092
+        path: /healthz
+      initialDelaySeconds: 10
+      timeoutSeconds: 60
+    ports:
+    - name: serverport
+      containerPort: 8090
+      hostPort: 8090
+    - name: agentport
+      containerPort: 8091
+      hostPort: 8091
+    - name: healthport
+      containerPort: 8092
+      hostPort: 8092
+    - name: adminport
+      containerPort: 8093
+      hostPort: 8093
+    volumeMounts:
+    - name: konnectivity-home
+      mountPath: /var/konnectivity-server
+    - name: konnectivityserverlog
+      mountPath: /var/konnectivity-server/konnectivity-server.log
+      readOnly: false
+    - name: secrets
+      mountPath: /etc/kubernetes/secrets
+      readOnly: true
+    - name: konnectivity-kubeconfig
+      mountPath: /var/konnectivity-server/kubeconfig
+  volumes:
+  - name: konnectivity-home
+    hostPath:
+      path: /var/konnectivity-server
+      type: DirectoryOrCreate
+  - name: secrets
+    secret:
+      defaultMode: 420
+      secretName: kube-apiserver
+  - name: konnectivity-kubeconfig
+    secret:
+      defaultMode: 420
+      secretName: konnectivity-kubeconfig
+  - name: konnectivityserverlog
+    hostPath:
+      path: /var/konnectivity-server/konnectivity-server.log
+      type: FileOrCreate
+  tolerations:
+  - effect: NoSchedule
+    key: node-role.kubernetes.io/master
+    operator: Exists

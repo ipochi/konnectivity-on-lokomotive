@@ -1,0 +1,18 @@
+storage:
+  directories:
+    - path: /var/konnectivity-server
+      filesystem: root
+      contents:
+        inline:
+      mode: 0755
+  files:
+    - path: /var/konnectivity-server/konnectivity-server.socket
+      filesystem: root
+      contents:
+        inline:
+      mode: 0755
+    - path: /var/konnectivity-server/konnectivity-server.log
+      filesystem: root
+      contents:
+        inline:
+      mode: 0755

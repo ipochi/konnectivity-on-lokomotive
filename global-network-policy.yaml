@@ -1,0 +1,14 @@
+apiVersion: crd.projectcalico.org/v1
+kind: GlobalNetworkPolicy
+metadata:
+  name: konnectivity-server
+spec:
+  selector: nodetype == 'controller'
+  preDNAT: true
+  applyOnForward: true
+  order: 0
+  ingress:
+  - action: Allow
+    protocol: TCP
+    destination:
+      ports: [8090,8091,8092,8093,8094]
