@@ -19,6 +19,7 @@ spec:
       "--logtostderr=true",
       "--ca-cert=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt",
       "--proxy-server-host=${CLUSTER_IP}",
+      "--enable-profiling",
       "--proxy-server-port=8091",
       "--service-account-token-path=/var/run/secrets/tokens/konnectivity-agent-token",
       ]

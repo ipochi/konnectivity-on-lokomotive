@@ -19,8 +19,8 @@ function create_globalnetworkpolicy() {
   kubectl apply -f global-network-policy.yaml
 }
 
-function create_egress_selector_configmap() {
-  kubectl create configmap -n kube-system egress-selector-config --from-file=egress-selector-config.yaml=egress-selector-config.yaml
+function create_egress_selector_secret() {
+  kubectl create secret -n kube-system generic egress-selector-config --from-file=egress-selector-config=egress-selector-config.yaml
 }
 
 function generate_certs_and_kubeconfig() {
@@ -57,18 +57,18 @@ function patch_apiserver_deployment() {
   kubectl patch deployment kube-apiserver -n kube-system --type="json" \
   -p='[
   {"op": "add", "path": "/spec/template/spec/volumes/-", "value": {"name": "konnectivity-uds", "hostPath": {"path": "/var/konnectivity-server", "type": "DirectoryOrCreate"}}},
-  {"op": "add", "path": "/spec/template/spec/volumes/-", "value": {"name": "konnectivity-config", "configMap": {"name": "egress-selector-config"}}},
+  {"op": "add", "path": "/spec/template/spec/volumes/-", "value": {"name": "konnectivity-config", "secret": {"secretName": "egress-selector-config", "defaultMode": 420}}},
   {"op": "add", "path": "/spec/template/spec/containers/0/volumeMounts/-", "value": {"name": "konnectivity-uds", "mountPath":"/var/konnectivity-server","readOnly":false}},
   {"op": "add", "path": "/spec/template/spec/containers/0/volumeMounts/-", "value": {"name": "konnectivity-config", "mountPath":"/var/konnectivity-server/config","readOnly":true}},
   {"op": "add", "path": "/spec/template/spec/containers/0/command/-", "value": "--api-audiences=https://kubernetes.default.svc,system:konnectivity-server"},
-  {"op": "add", "path": "/spec/template/spec/containers/0/command/-", "value": "--egress-selector-config-file=/var/konnectivity-server/config/egress-selector-config.yaml"}]'
+  {"op": "add", "path": "/spec/template/spec/containers/0/command/-", "value": "--egress-selector-config-file=/var/konnectivity-server/config/egress-selector-config"}]'
 }
 
 generate_certs_and_kubeconfig
 create_konnectivity_kubeconfig_secret
 create_rbac
 create_globalnetworkpolicy
-create_egress_selector_configmap
+create_egress_selector_secret
 install_konnectivity_proxy_server
 install_konnectivity_proxy_agent
 patch_apiserver_deployment
