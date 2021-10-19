@@ -10,6 +10,9 @@ spec:
   selector:
     matchLabels:
       app: konnectivity-server
+  strategy:
+    rollingUpdate:
+      maxUnavailable: 1
   template:
     metadata:
       labels:
