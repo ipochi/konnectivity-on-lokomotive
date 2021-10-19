@@ -46,6 +46,7 @@ spec:
           "--agent-service-account=konnectivity-agent",
           "--kubeconfig=/var/konnectivity-server/kubeconfig/kubeconfig",
           "--authentication-audience=system:konnectivity-server",
+          "--delete-existing-uds-file",
           ]
         livenessProbe:
           httpGet:
