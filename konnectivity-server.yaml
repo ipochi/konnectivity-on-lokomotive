@@ -10,6 +10,9 @@ spec:
   selector:
     matchLabels:
       app: konnectivity-server
+  strategy:
+    rollingUpdate:
+      maxUnavailable: 1
   template:
     metadata:
       labels:
@@ -39,7 +42,7 @@ spec:
           "--agent-port=8091",
           "--health-port=8092",
           "--admin-port=8093",
-          "--keepalive-time=1h",
+          "--keepalive-time=1m",
           "--mode=grpc",
           "--enable-profiling",
           "--agent-namespace=kube-system",
