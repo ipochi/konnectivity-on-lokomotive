@@ -9,7 +9,7 @@ egressSelections:
     # server. Supported values are "GRPC" and "HTTPConnect". There is no
     # end user visible difference between the two modes. You need to set the
     # Konnectivity server to work in the same mode.
-    proxyProtocol: GRPC
+    proxyProtocol: HTTPConnect
     transport:
       # This controls what transport the API Server uses to communicate with the
       # Konnectivity server. UDS is recommended if the Konnectivity server
